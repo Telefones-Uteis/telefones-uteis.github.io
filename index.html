@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Telefones Úteis</title>
+
+<style>
+body {
+    font-family: Arial;
+    background: #0f172a;
+    color: white;
+    padding: 15px;
+}
+
+h1 {
+    text-align: center;
+}
+
+input {
+    padding: 10px;
+    width: 100%;
+    margin: 5px 0;
+    border-radius: 8px;
+    border: none;
+}
+
+button {
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    margin: 3px;
+    cursor: pointer;
+}
+
+.add { background: #22c55e; color: white; }
+.edit { background: #3b82f6; color: white; }
+.delete { background: #ef4444; color: white; }
+.whats { background: #25d366; color: white; }
+
+.card {
+    background: #1e293b;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 10px;
+}
+
+.top {
+    position: sticky;
+    top: 0;
+    background: #0f172a;
+    padding-bottom: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>📞 Telefones Úteis</h1>
+
+<div class="top">
+
+<input id="busca" placeholder="🔍 Buscar contato por nome ou telefone..." onkeyup="render()">
+
+<input id="nome" placeholder="Nome">
+<input id="telefone" placeholder="Telefone">
+
+<button class="add" onclick="adicionar()">➕ Adicionar</button>
+
+</div>
+
+<div id="lista"></div>
+
+<script>
+let contatos = JSON.parse(localStorage.getItem("contatos") || "[]");
+
+function salvar() {
+    localStorage.setItem("contatos", JSON.stringify(contatos));
+}
+
+function adicionar() {
+    let nome = document.getElementById("nome").value;
+    let telefone = document.getElementById("telefone").value;
+
+    if (!nome || !telefone) {
+        alert("Preencha nome e telefone");
+        return;
+    }
+
+    contatos.push({ nome, telefone });
+    salvar();
+    limpar();
+    render();
+}
+
+function limpar() {
+    document.getElementById("nome").value = "";
+    document.getElementById("telefone").value = "";
+}
+
+function excluir(i) {
+    if (confirm("Excluir contato?")) {
+        contatos.splice(i, 1);
+        salvar();
+        render();
+    }
+}
+
+function editar(i) {
+    let novoNome = prompt("Nome:", contatos[i].nome);
+    let novoTel = prompt("Telefone:", contatos[i].telefone);
+
+    if (novoNome && novoTel) {
+        contatos[i] = { nome: novoNome, telefone: novoTel };
+        salvar();
+        render();
+    }
+}
+
+function whatsapp(tel) {
+    window.open("https://wa.me/55" + tel.replace(/\D/g, ""), "_blank");
+}
+
+function render() {
+    let busca = document.getElementById("busca").value.toLowerCase();
+    let lista = document.getElementById("lista");
+
+    lista.innerHTML = "";
+
+    contatos
+    .filter(c => 
+        c.nome.toLowerCase().includes(busca) || 
+        c.telefone.includes(busca)
+    )
+    .forEach((c, i) => {
+        lista.innerHTML += `
+        <div class="card">
+            <b>${c.nome}</b><br>
+            ${c.telefone}<br><br>
+
+            <button class="whats" onclick="whatsapp('${c.telefone}')">WhatsApp</button>
+            <button class="edit" onclick="editar(${i})">Editar</button>
+            <button class="delete" onclick="excluir(${i})">Excluir</button>
+        </div>
+        `;
+    });
+}
+
+render();
+</script>
+
+</body>
+</html>
